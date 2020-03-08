@@ -33,7 +33,7 @@ RCT_EXPORT_METHOD(requestPayment:(NSDictionary *)props promiseWithResolver:(RCTP
     paymentRequest.currencyCode = props[@"currencyCode"];
     paymentRequest.supportedNetworks = [self getSupportedNetworks:props];
     paymentRequest.paymentSummaryItems = [self getPaymentSummaryItems:props];
-    
+
     self.viewController = [[PKPaymentAuthorizationViewController alloc] initWithPaymentRequest: paymentRequest];
     self.viewController.delegate = self;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -58,55 +58,60 @@ RCT_EXPORT_METHOD(complete:(NSNumber *_Nonnull)status promiseWithResolver:(RCTPr
 - (NSArray *_Nonnull)getSupportedNetworks:(NSDictionary *_Nonnull)props
 {
     NSMutableDictionary *supportedNetworksMapping = [[NSMutableDictionary alloc] init];
-    
+
     if (@available(iOS 8, *)) {
         [supportedNetworksMapping setObject:PKPaymentNetworkAmex forKey:@"amex"];
         [supportedNetworksMapping setObject:PKPaymentNetworkMasterCard forKey:@"mastercard"];
         [supportedNetworksMapping setObject:PKPaymentNetworkVisa forKey:@"visa"];
     }
-    
+
     if (@available(iOS 9, *)) {
         [supportedNetworksMapping setObject:PKPaymentNetworkDiscover forKey:@"discover"];
         [supportedNetworksMapping setObject:PKPaymentNetworkPrivateLabel forKey:@"privatelabel"];
     }
-    
+
     if (@available(iOS 9.2, *)) {
         [supportedNetworksMapping setObject:PKPaymentNetworkChinaUnionPay forKey:@"chinaunionpay"];
         [supportedNetworksMapping setObject:PKPaymentNetworkInterac forKey:@"interac"];
     }
-    
+
     if (@available(iOS 10.1, *)) {
         [supportedNetworksMapping setObject:PKPaymentNetworkJCB forKey:@"jcb"];
         [supportedNetworksMapping setObject:PKPaymentNetworkSuica forKey:@"suica"];
     }
-    
+
     if (@available(iOS 10.3, *)) {
         [supportedNetworksMapping setObject:PKPaymentNetworkCarteBancaire forKey:@"cartebancaires"];
         [supportedNetworksMapping setObject:PKPaymentNetworkIDCredit forKey:@"idcredit"];
         [supportedNetworksMapping setObject:PKPaymentNetworkQuicPay forKey:@"quicpay"];
     }
-    
+
     if (@available(iOS 11.0, *)) {
         [supportedNetworksMapping setObject:PKPaymentNetworkCarteBancaires forKey:@"cartebancaires"];
     }
-    
+
     if (@available(iOS 12.0, *)) {
         [supportedNetworksMapping setObject:PKPaymentNetworkMaestro forKey:@"maestro"];
+
     }
-    
+
+    if (@available(iOS 12.1.1, *)) {
+        [supportedNetworksMapping setObject:PKPaymentNetworkMada forKey:@"mada"];
+    }
+
     NSArray *supportedNetworksProp = props[@"supportedNetworks"];
     NSMutableArray *supportedNetworks = [NSMutableArray array];
     for (NSString *supportedNetwork in supportedNetworksProp) {
         [supportedNetworks addObject: supportedNetworksMapping[supportedNetwork]];
     }
-    
+
     return supportedNetworks;
 }
 
 - (NSArray<PKPaymentSummaryItem *> *_Nonnull)getPaymentSummaryItems:(NSDictionary *_Nonnull)props
 {
     NSMutableArray <PKPaymentSummaryItem *> * paymentSummaryItems = [NSMutableArray array];
-    
+
     NSArray *displayItems = props[@"paymentSummaryItems"];
     if (displayItems.count > 0) {
         for (NSDictionary *displayItem in displayItems) {
@@ -115,7 +120,7 @@ RCT_EXPORT_METHOD(complete:(NSNumber *_Nonnull)status promiseWithResolver:(RCTPr
             [paymentSummaryItems addObject: [PKPaymentSummaryItem summaryItemWithLabel:label amount:amount]];
         }
     }
-    
+
     return paymentSummaryItems;
 }
 
@@ -126,7 +131,36 @@ RCT_EXPORT_METHOD(complete:(NSNumber *_Nonnull)status promiseWithResolver:(RCTPr
     self.completion = completion;
     if (self.requestPaymentResolve != NULL) {
         NSString *paymentData = [[NSString alloc] initWithData:payment.token.paymentData encoding:NSUTF8StringEncoding];
-        self.requestPaymentResolve(paymentData);
+        NSMutableDictionary *paymentResponse = [[NSMutableDictionary alloc]initWithCapacity:3];
+        [paymentResponse setObject:paymentData forKey:@"paymentData"];
+        NSString *transactionId = payment.token.transactionIdentifier;
+        [paymentResponse setObject:payment.token.paymentMethod.displayName forKey:@"displayName"];
+        [paymentResponse setObject:payment.token.paymentMethod.network forKey:@"network"];
+        NSString *type = nil;
+        switch (payment.token.paymentMethod.type) {
+            case PKPaymentMethodTypeDebit:
+                type = @"debit";
+                break;
+                case PKPaymentMethodTypeStore:
+                type = @"store";
+                break;
+                case PKPaymentMethodTypeCredit:
+                type = @"credit";
+                break;
+                case PKPaymentMethodTypePrepaid:
+                type = @"prepaid";
+                break;
+                case PKPaymentMethodTypeUnknown:
+                type = @"unknown";
+                break;
+            default:
+                break;
+        }
+        [paymentResponse setObject:type forKey:@"type"];
+        NSError *error;
+        NSData *json = [NSJSONSerialization dataWithJSONObject:paymentResponse options:NSJSONWritingPrettyPrinted error: &error];
+
+        self.requestPaymentResolve([[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]);
         self.requestPaymentResolve = NULL;
     }
 }
