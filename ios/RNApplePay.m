@@ -131,9 +131,9 @@ RCT_EXPORT_METHOD(complete:(NSNumber *_Nonnull)status promiseWithResolver:(RCTPr
     self.completion = completion;
     if (self.requestPaymentResolve != NULL) {
         NSString *paymentData = [[NSString alloc] initWithData:payment.token.paymentData encoding:NSUTF8StringEncoding];
-        NSMutableDictionary *paymentResponse = [[NSMutableDictionary alloc]initWithCapacity:3];
+        NSMutableDictionary *paymentResponse = [[NSMutableDictionary alloc]initWithCapacity:4];
         [paymentResponse setObject:paymentData forKey:@"paymentData"];
-        NSString *transactionId = payment.token.transactionIdentifier;
+        [paymentResponse setObject:payment.token.transactionIdentifier forKey:@"transactionId"];
         [paymentResponse setObject:payment.token.paymentMethod.displayName forKey:@"displayName"];
         [paymentResponse setObject:payment.token.paymentMethod.network forKey:@"network"];
         NSString *type = nil;
