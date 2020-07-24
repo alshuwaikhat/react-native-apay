@@ -102,7 +102,9 @@ RCT_EXPORT_METHOD(complete:(NSNumber *_Nonnull)status promiseWithResolver:(RCTPr
     NSArray *supportedNetworksProp = props[@"supportedNetworks"];
     NSMutableArray *supportedNetworks = [NSMutableArray array];
     for (NSString *supportedNetwork in supportedNetworksProp) {
-        [supportedNetworks addObject: supportedNetworksMapping[supportedNetwork]];
+        if(supportedNetworksMapping[supportedNetwork] != nil){
+            [supportedNetworks addObject: supportedNetworksMapping[supportedNetwork]];
+        }
     }
 
     return supportedNetworks;
