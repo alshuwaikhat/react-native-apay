@@ -43,6 +43,97 @@ RCT_EXPORT_METHOD(requestPayment:(NSDictionary *)props promiseWithResolver:(RCTP
     });
 }
 
+RCT_EXPORT_METHOD(canMakePaymentsUsingNetworks:(NSArray *)networks promiseWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    @try {
+        NSMutableArray *paymentNetworks = [[NSMutableArray alloc] initWithCapacity:networks.count];
+        for (int i = 0; i < [networks count]; i++) {
+          NSString *network = (NSString*) [networks objectAtIndex:i];
+         
+            if( [network caseInsensitiveCompare:@"visa"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkVisa];
+                        }
+            else if( [network caseInsensitiveCompare:@"amex"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkAmex];
+                        }
+            else if( [network caseInsensitiveCompare:@"cartebancaire"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkCarteBancaire];
+                        }
+            else if( [network caseInsensitiveCompare:@"cartebancaires"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkCarteBancaires];
+                        }
+            else if( [network caseInsensitiveCompare:@"cartesbancaires"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkCartesBancaires];
+                        }
+            else if( [network caseInsensitiveCompare:@"chinaunionpay"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkChinaUnionPay];
+                        }
+            else if( [network caseInsensitiveCompare:@"discover"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkDiscover];
+                        }
+            else if( [network caseInsensitiveCompare:@"eftpos"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkEftpos];
+                        }
+            else if( [network caseInsensitiveCompare:@"electron"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkElectron];
+                        }
+            else if( [network caseInsensitiveCompare:@"elo"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkElo];
+                        }
+            else if( [network caseInsensitiveCompare:@"idcredit"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkIDCredit];
+                        }
+            else if( [network caseInsensitiveCompare:@"interac"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkInterac];
+                        }
+            else if( [network caseInsensitiveCompare:@"jcb"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkJCB];
+                        }
+            else if( [network caseInsensitiveCompare:@"mada"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkMada];
+                        }
+            else if( [network caseInsensitiveCompare:@"maestro"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkMaestro];
+                        }
+            else if( [network caseInsensitiveCompare:@"mastercard"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkMasterCard];
+                        }
+            else if( [network caseInsensitiveCompare:@"mir"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkMir];
+                        }
+            else if( [network caseInsensitiveCompare:@"privatelabel"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkPrivateLabel];
+                        }
+            else if( [network caseInsensitiveCompare:@"quicpay"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkQuicPay];
+                        }
+            else if( [network caseInsensitiveCompare:@"suica"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkSuica];
+                        }
+            else if( [network caseInsensitiveCompare:@"vpay"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkVPay];
+                        }
+            else if( [network caseInsensitiveCompare:@"barcode"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkBarcode];
+                        }
+            else if( [network caseInsensitiveCompare:@"girocard"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkGirocard];
+                        }
+            else if( [network caseInsensitiveCompare:@"waon"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkWaon];
+                        }
+            else if( [network caseInsensitiveCompare:@"nanaco"] == NSOrderedSame ) {
+                            [paymentNetworks addObject: PKPaymentNetworkNanaco];
+                        }
+        }
+        BOOL canMakePaymentsUsingTheseNetworks=[PKPaymentAuthorizationViewController canMakePaymentsUsingNetworks:paymentNetworks];
+        resolve(@(canMakePaymentsUsingTheseNetworks));
+   }
+   @catch (NSException *exception) {
+       reject(exception.name, exception.reason, nil);
+   }
+    
+}
+
 RCT_EXPORT_METHOD(complete:(NSNumber *_Nonnull)status promiseWithResolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     if (self.completion != NULL) {
         self.completeResolve = resolve;
