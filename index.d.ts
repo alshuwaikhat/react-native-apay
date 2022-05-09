@@ -19,6 +19,7 @@ declare class ApplePay {
   static SUCCESS: APayPaymentStatusType
   static FAILURE: APayPaymentStatusType
   static canMakePayments: boolean
+  static canMakePaymentsUsingNetworks(networks:APayAllowedCardNetworkType[]): Promise<boolean>
   static requestPayment: (requestData: APayRequestDataType) => Promise<string>
   static complete: (status: APayPaymentStatusType) => Promise<void>
 }
